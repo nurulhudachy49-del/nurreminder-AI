@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>ReminderAI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;font-family:'Segoe UI',sans-serif;color:#fff;min-height:100vh}
+#app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:rgba(10,10,15,.95);position:sticky;top:0;z-index:99}
+.top h1{font-size:20px;font-weight:800}
+.lb{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.page{flex:1;padding:12px 16px 100px;overflow-y:auto}
+.hidden{display:none}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(10,10,15,.97);border-top:1px solid rgba(255,255,255,.08);display:flex}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 14px;background:none;border:none;color:rgba(255,255,255,.3);font-family:inherit;cursor:pointer;font-size:10px}
+.nb.on{color:#00e5a0;font-weight:700}
+.nb span:first-child{font-size:22px}
+.card{background:linear-gradient(135deg,rgba(0,229,160,.12),rgba(0,120,255,.08));border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(0,229,160,.15)}
+.stats{display:flex;gap:10px;margin-top:14px}
+.stat{flex:1;background:rgba(0,0,0,.2);border-radius:12px;padding:10px;text-align:center}
+.sn{display:block;color:#00e5a0;font-size:22px;font-weight:800}
+.sl{display:block;color:rgba(255,255,255,.4);font-size:11px}
+.nbtn{width:100%;padding:12px;background:linear-gradient(90deg,#f7971e,#ffd200);border:none;border-radius:14px;color:#111;font-weight:800;font-size:14px;cursor:pointer;margin-bottom:14px;font-family:inherit}
+.mic-area{text-align:center;padding:10px 0 20px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.mh{color:rgba(255,255,255,.5);font-size:13px}
+.mb{width:100px;height:100px;border-radius:50%;border:none;font-size:42px;cursor:pointer;background:#00e5a0;box-shadow:0 0 30px rgba(0,229,160,.3);transition:all .2s}
+.mb.on{background:#ff4444}
+.me{color:rgba(255,255,255,.2);font-size:12px;font-style:italic}
+.div{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.dl{flex:1;height:1px;background:rgba(255,255,255,.08)}
+.dt{color:rgba(255,255,255,.25);font-size:12px}
+.ibox{background:rgba(255,255,255,.05);border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,.08);margin-bottom:14px}
+textarea{width:100%;background:transparent;border:none;outline:none;color:#fff;font-size:15px;resize:none;line-height:1.6;font-family:inherit}
+textarea::placeholder{color:rgba(255,255,255,.25)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+.chip{flex-shrink:0;padding:6px 12px;border-radius:20px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.sbtn{width:100%;padding:13px;border-radius:50px;border:none;background:linear-gradient(90deg,#00e5a0,#00a8ff);color:#000;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit;margin-top:8px}
+.sbtn:disabled{opacity:.4}
+.nc{background:rgba(255,255,255,.04);border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,.08)}
+.nl{color:rgba(255,255,255,.4);font-size:12px;margin-bottom:4px}
+.nt{color:#00e5a0;font-size:28px;font-weight:800}
+.ntt{color:#fff;font-size:13px}
+.sec{color:#fff;font-size:20px;font-weight:800;margin:8px 0 14px}
+.gl{color:rgba(255,255,255,.35);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:8px 0}
+.rc{background:rgba(255,255,255,.04);border-radius:16px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:10px}
+.rc.fd{opacity:.4}
+.rl{display:flex;flex-direction:column;gap:3px;flex:1}
+.rt{color:#00e5a0;font-size:24px;font-weight:800}
+.rt.x{text-decoration:line-through}
+.rtt{color:#fff;font-size:13px;font-weight:600}
+.tl{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.ti{color:rgba(255,255,255,.6);font-size:12px;display:flex;gap:6px}
+.td{width:5px;height:5px;border-radius:50%;background:#00e5a0;flex-shrink:0;margin-top:5px}
+.db{background:rgba(255,50,50,.1);border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:15px}
+.emp{text-align:center;padding:40px 0;color:rgba(255,255,255,.3);font-size:15px;line-height:2.5}
+.fw{text-align:center}
+.fsub{color:rgba(255,255,255,.5);font-size:13px;margin-bottom:20px}
+.tr{width:220px;height:220px;margin:0 auto 20px;position:relative;display:flex;align-items:center;justify-content:center}
+.tr svg{position:absolute}
+.ti2{display:flex;flex-direction:column;align-items:center}
+.tn{color:#fff;font-size:44px;font-weight:800;letter-spacing:-2px}
+.tl2{color:rgba(255,255,255,.4);font-size:12px;margin-top:2px}
+.fbs{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.fb{padding:10px 18px;border-radius:50px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.fb.go{background:#00e5a0;color:#000;border-color:#00e5a0}
+.fb.st{background:#ff4444;color:#fff;border-color:#ff4444}
+.tc{background:rgba(255,255,255,.04);border-radius:14px;padding:14px;font-size:13px;line-height:1.9;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.07)}
+.tct{color:#00e5a0;font-weight:700;margin-bottom:6px}
+.sc{background:rgba(255,255,255,.04);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,.07)}
+.sl2{color:rgba(255,255,255,.45);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.si{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;color:#fff;font-size:15px;outline:none;font-family:inherit}
+.lr{display:flex;gap:10px}
+.lbtn{flex:1;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,.08);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.lbtn.on{background:#00e5a0;color:#000}
+.vt{text-align:center;color:rgba(255,255,255,.2);font-size:11px;margin-top:16px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:50px;font-weight:700;z-index:9999;font-size:13px;white-space:nowrap;font-family:inherit;display:none}
+.toast.show{display:block}
+.tok{background:#00e5a0;color:#000}
+.terr{background:#ff4444;color:#fff}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="toast" id="toast"></div>
+<div class="top">
+  <h1>ReminderAI</h1>
+  <button class="lb" id="lb" onclick="tLang()">EN</button>
+</div>
+<div class="page" id="page"></div>
+<nav>
+  <button class="nb on" id="n0" onclick="go(0)"><span>🏠</span><span id="nl0">হোম</span></button>
+  <button class="nb" id="n1" onclick="go(1)"><span>📋</span><span id="nl1">রিমাইন্ডার</span></button>
+  <button class="nb" id="n2" onclick="go(2)"><span>🎯</span><span id="nl2">ফোকাস</span></button>
+  <button class="nb" id="n3" onclick="go(3)"><span>⚙️</span><span id="nl3">সেটিংস</span></button>
+</nav>
+</div>
+<script>
+var tab=0,lang=ls('lang')||'bn',uname=ls('name')||'',reminders=ls('rem')||[],alarm=ls('alarm')||'ai',
+    fsecs=1500,frun=false,listening=false,blob=null,recording=false,notifP='default';
+var timers={},fint=null,mrec=null,chunks=[];
+
+function ls(k,v){try{if(v===undefined){var x=localStorage.getItem('ra_'+k);return x?JSON.parse(x):null;}localStorage.setItem('ra_'+k,JSON.stringify(v));}catch{}}
+
+function fmt(h,m){var p=h>=12?'PM':'AM';return(h%12||12)+':'+(m<10?'0':'')+m+' '+p;}
+function msU(h,m){var n=new Date(),t=new Date();t.setHours(h,m,0,0);if(t<=n)t.setDate(t.getDate()+1);return t-n;}
+function greet(){var h=new Date().getHours();
+  var b=['শুভ সকাল! 🌅','শুভ দুপুর! ☀️','শুভ বিকেল! 🌇','শুভ রাত! 🌙'];
+  var e=['Good morning! 🌅','Good noon! ☀️','Good afternoon! 🌇','Good night! 🌙'];
+  var i=h<12?0:h<14?1:h<18?2:3;return lang==='bn'?b[i]:e[i];}
+
+function parseTime(txt){
+  var t=txt.toLowerCase(),h=8;
+  if(t.includes('ফজর')||t.includes('fajr'))h=5;
+  else if(t.includes('জোহর')||t.includes('dhuhr'))h=13;
+  else if(t.includes('আসর')||t.includes('asr'))h=16;
+  else if(t.includes('মাগরিব')||t.includes('maghrib'))h=18;
+  else if(t.includes('এশা')||t.includes('isha'))h=20;
+  else{
+    var patterns=[
+      [/সকাল[^\d]*(\d+)/,function(m){return parseInt(m[1]);}],
+      [/দুপুর[^\d]*(\d+)/,function(m){return parseInt(m[1])+12;}],
+      [/বিকাল[^\d]*(\d+)/,function(m){return parseInt(m[1])+12;}],
+      [/সন্ধ্যা[^\d]*(\d+)/,function(m){return parseInt(m[1])+12;}],
+      [/রাত[^\d]*(\d+)/,function(m){var n=parseInt(m[1]);return n>=10?n:n+12;}],
+      [/(\d+)\s*am/i,function(m){return parseInt(m[1])%12;}],
+      [/(\d+)\s*pm/i,function(m){return(parseInt(m[1])%12)+12;}],
+      [/(\d+)\s*টা/,function(m){return parseInt(m[1]);}],
+    ];
+    for(var i=0;i<patterns.length;i++){var m=txt.match(patterns[i][0]);if(m){h=patterns[i][1](m);break;}}
+  }
+  return h;
+}
+
+function toast(msg,t){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+(t||'tok');
+  setTimeout(function(){el.className='toast';},3000);
+}
+
+function schedule(r){
+  if(timers[r.id])clearTimeout(timers[r.id]);
+  timers[r.id]=setTimeout(function(){
+    if(Notification.permission==='granted')
+      new Notification('⏰ '+r.title,{body:r.tasks.slice(0,3).map(function(t,i){return(i+1)+'. '+t;}).join('\n'),icon:'https://api.dicebear.com/7.x/bottts/svg?seed=ra'});
+    if(alarm==='ai'&&window.speechSynthesis){
+      var u=new SpeechSynthesisUtterance(r.greeting);u.lang=lang==='bn'?'bn-BD':'en-US';u.rate=0.9;
+      window.speechSynthesis.speak(u);
+    }
+    if(alarm==='recorded'&&blob)new Audio(URL.createObjectURL(blob)).play().catch(function(){});
+    reminders=reminders.map(function(x){return x.id===r.id?Object.assign({},x,{fired:true}):x;});
+    ls('rem',reminders);render();
+  },msU(r.h,r.m));
+}
+
+function submit(){
+  var el=document.getElementById('mt');
+  var input=(el?el.value:'')||'';
+  if(!input.trim())return;
+  var h=parseTime(input);
+  var timeStr=fmt(h,0);
+  var tasks=[input.length>8?input.substring(0,40):(lang==='bn'?'কাজ শুরু করুন':'Start task'),lang==='bn'?'মনোযোগ দিন':'Stay focused',lang==='bn'?'প্রোডাক্টিভ থাকুন':'Be productive'];
+  var id=Date.now().toString();
+  var r={id:id,rawInput:input,time:timeStr,h:h,m:0,tasks:tasks,
+    greeting:(lang==='bn'?timeStr+' বেজে গেছে! কাজ শুরু করুন।':timeStr+' - Time to start!'),
+    title:(lang==='bn'?timeStr+' — রিমাইন্ডার ⏰':timeStr+' — Reminder ⏰'),
+    fired:false};
+  reminders=[r].concat(reminders);ls('rem',reminders);schedule(r);
+  if(el)el.value='';
+  toast('✅ '+timeStr+(lang==='bn'?' তে রিমাইন্ডার সেট!':' reminder set!'));
+  render();
+}
+
+function voice(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast(lang==='bn'?'ভয়েস সাপোর্ট নেই':'Not supported','terr');return;}
+  var rec=new SR();rec.lang=lang==='bn'?'bn-BD':'en-US';rec.interimResults=false;
+  rec.onstart=function(){listening=true;render();};
+  rec.onend=function(){listening=false;render();};
+  rec.onresult=function(e){var t=e.results[0][0].transcript;var el=document.getElementById('mt');if(el)el.value=t;setTimeout(submit,400);};
+  rec.onerror=function(){listening=false;toast(lang==='bn'?'ভয়েস ব্যর্থ':'Failed','terr');render();};
+  rec.start();
+}
+
+function delR(id){if(timers[id])clearTimeout(timers[id]);reminders=reminders.filter(function(r){return r.id!==id;});ls('rem',reminders);render();}
+function tLang(){lang=lang==='bn'?'en':'bn';ls('lang',lang);render();}
+function setChip(t){var el=document.getElementById('mt');if(el){el.value=t;el.focus();}}
+async function askN(){var p=await Notification.requestPermission();notifP=p;if(p==='granted')toast(lang==='bn'?'✅ নোটিফিকেশন চালু!':'✅ Enabled!');render();}
+
+function startF(){frun=true;fint=setInterval(function(){fsecs--;if(fsecs<=0){clearInterval(fint);frun=false;fsecs=1500;toast(lang==='bn'?'🎉 Focus সম্পন্ন!':'🎉 Done!');}updT();},1000);}
+function pauseF(){frun=false;clearInterval(fint);updT();}
+function resetF(){clearInterval(fint);frun=false;fsecs=1500;updT();}
+function breakF(){clearInterval(fint);frun=false;fsecs=300;startF();}
+function updT(){
+  var mn=Math.floor(fsecs/60),sc=fsecs%60;
+  var el=document.getElementById('tn');if(el)el.textContent=(mn<10?'0':'')+mn+':'+(sc<10?'0':'')+sc;
+  var pct=((1500-fsecs)/1500)*100;
+  var c=document.getElementById('tc');
+  if(c){var ci=2*Math.PI*100;c.style.strokeDashoffset=ci*(1-pct/100);}
+  var l=document.getElementById('tl2');
+  if(l)l.textContent=frun?(lang==='bn'?'মনোযোগ চলছে...':'Focusing...'):(lang==='bn'?'প্রস্তুত':'Ready');
+}
+
+async function startRec(){
+  try{
+    var s=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];
+    mrec=new MediaRecorder(s);
+    mrec.ondataavailable=function(e){chunks.push(e.data);};
+    mrec.onstop=function(){blob=new Blob(chunks,{type:'audio/webm'});toast(lang==='bn'?'✅ রেকর্ড হয়েছে!':'✅ Recorded!');recording=false;render();};
+    mrec.start();recording=true;render();
+  }catch{toast(lang==='bn'?'মাইক দিন':'Allow mic','terr');}
+}
+function stopRec(){mrec&&mrec.stop();}
+
+function go(t){tab=t;[0,1,2,3].forEach(function(i){document.getElementById('n'+i).className='nb'+(i===t?' on':'');});render();}
+
+function render(){
+  if('Notification'in window)notifP=Notification.permission;
+  document.getElementById('lb').textContent=lang==='bn'?'EN':'বাং';
+  var nl=lang==='bn'?['হোম','রিমাইন্ডার','ফোকাস','সেটিংস']:['Home','Reminders','Focus','Settings'];
+  for(var i=0;i<4;i++)document.getElementById('nl'+i).textContent=nl[i];
+  var up=reminders.filter(function(r){return!r.fired;}).sort(function(a,b){return(a.h*60+a.m)-(b.h*60+b.m);});
+  var dn=reminders.filter(function(r){return r.fired;});
+  var bn=lang==='bn';
+  var chips=bn?['ফজর — সকাল ৫টায়','সকাল ৮টায় কাজ','মাগরিব — সন্ধ্যা ৬টায়','রাত ১০টায় ঘুমাও']:['Fajr at 5 AM','Work at 8 AM','Maghrib at 6 PM','Sleep at 10 PM'];
+  var p=document.getElementById('page');
+
+  if(tab===0){
+    p.innerHTML='<div class="card"><p style="color:rgba(255,255,255,.5);font-size:14px">'+greet()+'</p><p style="color:#fff;font-size:20px;font-weight:800;margin:4px 0 14px">'+(uname?(bn?'স্বাগতম, ':'Welcome, ')+uname+'!':(bn?'স্বাগতম!':'Welcome!'))+'</p><div class="stats"><div class="stat"><span class="sn">'+up.length+'</span><span class="sl">'+(bn?'সক্রিয়':'Active')+'</span></div><div class="stat"><span class="sn">'+dn.length+'</span><span class="sl">'+(bn?'সম্পন্ন':'Done')+'</span></div><div class="stat"><span class="sn">'+reminders.reduce(function(a,r){return a+r.tasks.length;},0)+'</span><span class="sl">'+(bn?'কাজ':'Tasks')+'</span></div></div></div>'
+    +(notifP!=='granted'?'<button class="nbtn" onclick="askN()">🔔 '+(bn?'নোটিফিকেশন চালু করুন':'Enable Notifications')+'</button>':'')
+    +'<div class="mic-area"><p class="mh">'+(listening?(bn?'🎙️ বলুন...':'🎙️ Speak...'):(bn?'বাটনে চাপুন ও বলুন':'Tap & speak'))+'</p><button class="mb'+(listening?' on':'')+'" onclick="voice()">'+(listening?'🔴':'🎙️')+'</button><p class="me">'+(bn?'"সকাল ৮টায় অফিসের রিপোর্ট তৈরি করতে হবে"':'"Remind me at 8 AM to prepare the report"')+'</p></div>'
+    +'<div class="div"><div class="dl"></div><span class="dt">'+(bn?'অথবা লিখুন':'Or type')+'</span><div class="dl"></div></div>'
+    +'<div class="ibox"><textarea id="mt" rows="3" placeholder="'+(bn?'যেমন: সকাল ৮টায় কাজ শুরু...':'e.g. Remind me at 8 AM...')+'"></textarea><div class="chips">'+chips.map(function(c){return'<button class="chip" onclick="setChip(\''+c+'\')">'+c+'</button>';}).join('')+'</div><button class="sbtn" onclick="submit()">✅ '+(bn?'রিমাইন্ডার সেট করুন':'Set Reminder')+'</button></div>'
+    +(up[0]?'<div class="nc"><p class="nl">⏰ '+(bn?'পরবর্তী রিমাইন্ডার':'Next Reminder')+'</p><p class="nt">'+up[0].time+'</p><p class="ntt">'+up[0].title+'</p></div>':'');
+  } else if(tab===1){
+    var html='<h2 class="sec">📋 '+(bn?'রিমাইন্ডার':'Reminders')+'</h2>';
+    if(!reminders.length)html+='<div class="emp">🌙 '+(bn?'কোনো রিমাইন্ডার নেই<br><small>হোম থেকে যোগ করুন</small>':'No reminders yet<br><small>Add from Home tab</small>')+'</div>';
+    if(up.length)html+='<p class="gl">'+(bn?'সক্রিয়':'Active')+'</p>';
+    up.forEach(function(r){html+='<div class="rc"><div class="rl"><span class="rt">'+r.time+'</span><span class="rtt">'+r.title+'</span><div class="tl">'+r.tasks.map(function(t){return'<div class="ti"><div class="td"></div><span>'+t+'</span></div>';}).join('')+'</div></div><button class="db" onclick="delR(\''+r.id+'\')">🗑️</button></div>';});
+    if(dn.length)html+='<p class="gl" style="opacity:.5">'+(bn?'সম্পন্ন':'Done')+'</p>';
+    dn.forEach(function(r){html+='<div class="rc fd"><div class="rl"><span class="rt x">'+r.time+'</span><span class="rtt">'+r.title+' ✅</span></div><button class="db" onclick="delR(\''+r.id+'\')">✕</button></div>';});
+    p.innerHTML=html;
+  } else if(tab===2){
+    var mn=Math.floor(fsecs/60),sc=fsecs%60;
+    var pct=((1500-fsecs)/1500)*100,ci=2*Math.PI*100;
+    p.innerHTML='<div class="fw"><h2 class="sec" style="text-align:center">🎯 Focus Mode</h2><p class="fsub">'+(bn?'২৫ মিনিট কাজ, ৫ মিনিট বিরতি':'Work 25 min, rest 5 min')+'</p>'
+    +'<div class="tr"><svg width="220" height="220"><circle cx="110" cy="110" r="100" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/><circle id="tc" cx="110" cy="110" r="100" fill="none" stroke="#00e5a0" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+ci+'" stroke-dashoffset="'+ci*(1-pct/100)+'" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s"/></svg>'
+    +'<div class="ti2"><span class="tn" id="tn">'+(mn<10?'0':'')+mn+':'+(sc<10?'0':'')+sc+'</span><span class="tl2" id="tl2">'+(frun?(bn?'মনোযোগ চলছে...':'Focusing...'):(bn?'প্রস্তুত':'Ready'))+'</span></div></div>'
+    +'<div class="fbs"><button class="fb" onclick="resetF()">↺ '+(bn?'রিসেট':'Reset')+'</button><button class="fb '+(frun?'st':'go')+'" onclick="'+(frun?'pauseF()':'startF()')+'">'+(frun?'⏸ '+(bn?'পজ':'Pause'):'▶ '+(bn?'শুরু':'Start'))+'</button><button class="fb" onclick="breakF()">☕ '+(bn?'বিরতি':'Break')+'</button></div></div>'
+    +'<div class="tc"><p class="tct">💡 '+(bn?'Focus টিপস':'Focus Tips')+'</p><p>• '+(bn?'ফোন সাইলেন্ট রাখুন':'Put phone on silent')+'</p><p>• '+(bn?'একটি কাজে মনোযোগ দিন':'Focus on one task')+'</p><p>• '+(bn?'পানি পাশে রাখুন':'Keep water nearby')+'</p></div>';
+  } else {
+    p.innerHTML='<h2 class="sec">⚙️ '+(bn?'সেটিংস':'Settings')+'</h2>'
+    +'<div class="sc"><p class="sl2">👤 '+(bn?'আপনার নাম':'Your Name')+'</p><input class="si" placeholder="'+(bn?'নাম লিখুন...':'Enter name...')+'" value="'+uname+'" oninput="uname=this.value;ls(\'name\',this.value)"/></div>'
+    +'<div class="sc"><p class="sl2">🌐 '+(bn?'ভাষা':'Language')+'</p><div class="lr"><button class="lbtn'+(lang==='bn'?' on':'')+'" onclick="lang=\'bn\';ls(\'lang\',\'bn\');render()">🇧🇩 বাংলা</button><button class="lbtn'+(lang==='en'?' on':'')+'" onclick="lang=\'en\';ls(\'lang\',\'en\');render()">🇬🇧 English</button></div></div>'
+    +'<div class="sc"><p class="sl2">🔊 '+(bn?'অ্যালার্ম':'Alarm')+'</p>'
+    +[['ai',bn?'🤖 AI ভয়েস':'🤖 AI Voice'],['recorded',bn?'🎙️ নিজের ভয়েস':'🎙️ Record Voice'],['silent',bn?'🔕 নীরব':'🔕 Silent']].map(function(a){return'<button style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid '+(alarm===a[0]?'#00e5a0':'rgba(255,255,255,.1)')+';background:'+(alarm===a[0]?'rgba(0,229,160,.12)':'rgba(255,255,255,.04)')+';color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:inherit" onclick="alarm=\''+a[0]+'\';ls(\'alarm\',\''+a[0]+'\');render()"><span>'+a[1]+'</span>'+(alarm===a[0]?'<span style="color:#00e5a0">✓</span>':'')+'</button>';}).join('')
+    +(alarm==='recorded'?'<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><button style="padding:8px 16px;border-radius:20px;border:none;background:'+(recording?'#ff4444':'rgba(255,255,255,.1)')+';color:#fff;font-family:inherit;cursor:pointer;font-weight:700;font-size:13px" onclick="'+(recording?'stopRec()':'startRec()')+'">'+(recording?(bn?'⏹ বন্ধ':'⏹ Stop'):(bn?'🎙️ রেকর্ড শুরু':'🎙️ Record'))+'</button>'+(blob?'<span style="color:#00e5a0;font-size:13px">✅ '+(bn?'রেকর্ড হয়েছে':'Recorded')+'</span>':'')+'</div>':'')
+    +'</div>'
+    +'<p class="vt">ReminderAI v2.0 · Made with Claude AI</p>';
+  }
+}
+
+if('Notification'in window)notifP=Notification.permission;
+reminders.filter(function(r){return!r.fired;}).forEach(schedule);
+render();
+</script>
+</body>
+</html>
